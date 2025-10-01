@@ -1,5 +1,5 @@
 // === Dados & Utilitários ===
-const LS_KEY = "al_tarefas_data_v214";
+const LS_KEY = "al_tarefas_data_v215";
 const DEFAULT_ADMIN = { user: "admin", passHash: hashString("975321") }; // senha padrão oculta por hash
 
 function loadData(){
@@ -15,7 +15,6 @@ function saveData(data){ localStorage.setItem(LS_KEY, JSON.stringify(data)); }
 function uid(){ return Math.random().toString(36).slice(2,10); }
 
 function hashString(str){
-  // hash simples (não criptográfico) apenas para não deixar a senha em claro
   let h=0; for(let i=0;i<str.length;i++){ h = (h<<5)-h + str.charCodeAt(i); h|=0; }
   return String(h);
 }
@@ -33,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindTabs();
   bindInstall();
   updateView("login");
+
   // export/import direto da tela de login (para funcionário)
   document.getElementById("btnExportMineFromLogin").addEventListener("click", () => {
     const sel = document.getElementById("funcSelect");
@@ -126,23 +126,19 @@ function bindAdmin(){
     renderAdmin();
   });
 
-  // Exportar todos
   document.getElementById("btnExportAll").addEventListener("click", () => {
     const txt = serializeTasks(state.data.tasks);
     downloadTxt("tarefas_todas.txt", txt);
   });
-  // Importar todos
   document.getElementById("fileImportAll").addEventListener("change", ev => {
-    handleImportFile(ev.target.files[0], null, null); // null = mantém owner de cada linha
+    handleImportFile(ev.target.files[0], null, null);
     ev.target.value="";
   });
 
-  // Switch mode
   document.getElementById("btnSwitchMode").addEventListener("click", () => updateView("login"));
 }
 
 function renderAdmin(){
-  // stats
   const today = new Date().toDateString();
   const pend = state.data.tasks.filter(t=>t.status==="pending").length;
   const conclHoje = state.data.tasks.filter(t=>t.status==="done" && new Date(t.doneAt).toDateString()===today).length;
@@ -150,7 +146,6 @@ function renderAdmin(){
   document.getElementById("statConcluidas").textContent = conclHoje;
   document.getElementById("statEquipe").textContent = state.data.workers.length;
 
-  // lista de funcionários (pílulas)
   const wl = document.getElementById("workersList");
   wl.innerHTML="";
   state.data.workers.forEach(w => {
@@ -159,7 +154,6 @@ function renderAdmin(){
     wl.appendChild(span);
   });
 
-  // cards por funcionário
   const wrap = document.getElementById("cardsContainer");
   wrap.innerHTML="";
   state.data.workers.forEach(w => {
@@ -200,7 +194,6 @@ function renderAdmin(){
       list.appendChild(el);
     });
 
-    // bind export/import individuais
     card.querySelector(`[data-export="${w.id}"]`).addEventListener("click", () => {
       exportTasksFor(w.id, w.name);
     });
@@ -210,7 +203,6 @@ function renderAdmin(){
     });
   });
 
-  // toggles (concluir tarefa)
   wrap.querySelectorAll("input[type=checkbox][data-toggle]").forEach(chk => {
     chk.addEventListener("change", () => {
       const id = chk.dataset.toggle;
@@ -225,10 +217,7 @@ function renderAdmin(){
 }
 
 function sortTasks(a,b){
-  // pendentes primeiro, depois concluídas; dentro de cada grupo, por prazo asc
-  if(a.status!==b.status){
-    return a.status==="pending" ? -1 : 1;
-  }
+  if(a.status!==b.status){ return a.status==="pending" ? -1 : 1; }
   const ad = a.due ? new Date(a.due).getTime() : Infinity;
   const bd = b.due ? new Date(b.due).getTime() : Infinity;
   return ad - bd;
@@ -281,12 +270,10 @@ function renderFunc(){
     });
   });
 
-  // switch
   document.getElementById("btnSwitchMode").onclick = () => updateView("login");
 }
 
 // === Importação/Exportação (.txt simples) ===
-// Formato de linha: TASK|ownerId|ownerName|title|desc|due|status|doneAt|id
 function serializeTasks(tasks){
   return tasks.map(t => [
     "TASK",
@@ -309,17 +296,25 @@ function exportTasksFor(ownerId, ownerName){
   downloadTxt(`tarefas_${slug(ownerName)}.txt`, txt);
 }
 
+// ✅ Ajustado para criar funcionário se não existir
 function handleImportFile(file, ownerId, ownerName){
   if(!file) return;
   const reader = new FileReader();
   reader.onload = () => {
-    const lines = String(reader.result).split(/\\r?\\n/).map(l=>l.trim()).filter(Boolean);
+    const lines = String(reader.result).split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
     let imported = 0;
     lines.forEach(line => {
       const parts = line.split("|");
       if(parts[0] !== "TASK") return;
       const [_, ownerFromFile, ownerNameFromFile, title, desc, due, status, doneAt, id] = parts;
-      const finalOwner = ownerId || ownerFromFile;
+
+      let finalOwner = ownerId || ownerFromFile;
+      let finalName = ownerName || ownerNameFromFile || "Funcionário";
+
+      if(finalOwner && !state.data.workers.some(w=>w.id===finalOwner)){
+        state.data.workers.push({ id: finalOwner, name: finalName });
+      }
+
       const task = {
         id: id || uid(),
         owner: finalOwner,
@@ -330,14 +325,15 @@ function handleImportFile(file, ownerId, ownerName){
         createdAt: Date.now(),
         doneAt: doneAt ? Number(doneAt) : (status==="done"? Date.now() : null)
       };
+
       if(!task.owner) return;
-      // evita duplicado por id
       if(!state.data.tasks.some(t=>t.id===task.id)){
         state.data.tasks.push(task); imported++;
       }
     });
     saveData(state.data);
-    alert(`Importadas ${imported} tarefa(s) para ${ownerName || getWorkerNameById(ownerId) || "o funcionário selecionado"}.`);
+    refreshLoginSelectors();
+    alert(`Importadas ${imported} tarefa(s). Funcionários novos foram adicionados se não existiam.`);
     if(state.mode==="admin") renderAdmin(); else renderFunc();
   };
   reader.readAsText(file, "utf-8");
@@ -355,7 +351,7 @@ function downloadTxt(filename, content){
   URL.revokeObjectURL(url);
 }
 
-function slug(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,""); }
+function slug(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,""); }
 function formatDate(d){ try{ const x=new Date(d); return x.toLocaleDateString(); } catch(e){ return d; } }
 function formatDateTime(ms){ const d = new Date(ms); return d.toLocaleString(); }
 
