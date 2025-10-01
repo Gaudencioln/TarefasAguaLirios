@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PWA Tarefas - Água Lírios</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icons/icon-192.png">
+  <link rel="icon" href="icon-192.png">
   <meta name="theme-color" content="#0a67b4"/>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="app-header">
     <div class="brand">
-      <img src="icons/icon-192.png" alt="Água Lírios" class="logo"/>
+      <img src="icon-192.png" alt="Água Lírios" class="logo"/>
       <h1>PWA Tarefas — Água Lírios</h1>
     </div>
     <nav class="top-actions">
@@ -22,110 +22,10 @@
   </header>
 
   <main id="app">
-    <!-- Tela de login / seleção de perfil -->
-    <section id="loginView" class="view active">
-      <div class="card center">
-        <h2>Entrar</h2>
-        <div class="tab-row">
-          <button class="tab active" data-tab="admin">Admin</button>
-          <button class="tab" data-tab="func">Funcionário</button>
-        </div>
-
-        <div id="adminLogin" class="tab-panel active">
-          <label>Usuário</label>
-          <input type="text" id="adminUser" placeholder="admin" autocomplete="username"/>
-          <label>Senha</label>
-          <input type="password" id="adminPass" placeholder="•••••••" autocomplete="current-password"/>
-          <small class="muted">Senha padrão já configurada, sem aparecer no código.</small>
-          <button class="primary block" id="btnAdminEnter">Entrar como Admin</button>
-        </div>
-
-        <div id="funcLogin" class="tab-panel">
-          <label>Selecione seu nome</label>
-          <select id="funcSelect"></select>
-          <button class="primary block" id="btnFuncEnter">Entrar</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Painel do Admin -->
-    <section id="adminView" class="view">
-      <div class="grid">
-        <div class="card">
-          <h2>Resumo</h2>
-          <div class="stats">
-            <div class="stat">
-              <span id="statPendentes">0</span>
-              <small>Pendentes</small>
-            </div>
-            <div class="stat">
-              <span id="statConcluidas">0</span>
-              <small>Concluídas (hoje)</small>
-            </div>
-            <div class="stat">
-              <span id="statEquipe">0</span>
-              <small>Total Funcionários</small>
-            </div>
-          </div>
-          <div class="row gap">
-            <button id="btnExportAll" class="secondary">Exportar todos</button>
-            <label class="file">
-              <input type="file" id="fileImportAll" accept=".txt"/>
-              <span>Importar todos (.txt)</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>Novo Funcionário</h2>
-          <div class="row">
-            <input type="text" id="newWorkerName" placeholder="Nome do funcionário"/>
-            <button id="btnAddWorker" class="primary">Adicionar</button>
-          </div>
-          <div id="workersList" class="pill-list"></div>
-        </div>
-
-        <div class="card">
-          <h2>Criar Tarefa</h2>
-          <div class="form-grid">
-            <label>Título</label>
-            <input id="taskTitle" type="text" placeholder="Ex.: Entregar relatórios"/>
-
-            <label>Descrição</label>
-            <textarea id="taskDesc" rows="3" placeholder="Detalhes da tarefa"></textarea>
-
-            <label>Responsável</label>
-            <select id="taskOwner"></select>
-
-            <label>Prazo</label>
-            <input id="taskDue" type="date"/>
-          </div>
-          <div class="row right">
-            <button id="btnCreateTask" class="primary">Salvar</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>Tarefas por Funcionário</h2>
-          <div id="cardsContainer" class="cards"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Painel do Funcionário -->
-    <section id="funcView" class="view">
-      <div class="card">
-        <h2 id="helloWorker">Olá 👋</h2>
-        <div id="funcTasks" class="list"></div>
-        <div class="row gap top">
-          <button id="btnExportMine" class="secondary">Exportar minhas tarefas</button>
-          <label class="file">
-            <input type="file" id="fileImportMine" accept=".txt"/>
-            <span>Importar minhas tarefas (.txt)</span>
-          </label>
-        </div>
-      </div>
-    </section>
+    <!-- As views (login, admin, func) são controladas pelo app.js -->
+    <section id="loginView" class="view active"></section>
+    <section id="adminView" class="view"></section>
+    <section id="funcView" class="view"></section>
   </main>
 
   <footer class="app-footer">
