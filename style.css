@@ -3,5 +3,9 @@ body{font-family:Arial, sans-serif;background:#f3f7fb;margin:0;color:#0a2a3f}
 .brand{display:flex;align-items:center;gap:10px}
 .brand .logo{height:40px}
 .app-footer{text-align:center;padding:20px;color:#666}
-.view{display:none}
+.view{display:none;padding:20px}
 .view.active{display:block}
+.card{background:#fff;padding:15px;margin:10px 0;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer}
+button.primary{background:#0a67b4;color:#fff}
+button.secondary{background:#ddd}

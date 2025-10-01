@@ -1,4 +1,4 @@
-const CACHE_NAME = 'al-tarefas-v2.1.2';
+const CACHE_NAME = 'al-tarefas-v2.1.3';
 const ASSETS = [
   './',
   './index.html',
